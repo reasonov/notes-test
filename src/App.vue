@@ -1,26 +1,39 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="main-layout">
+    <router-view />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { watch, onBeforeMount } from 'vue';
+import { useStore } from "vuex";
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  setup() {
+    const store = useStore();
+
+    // before mounting, we add the value from the local storage to the list of notes
+    onBeforeMount(() => {
+      if(window.localStorage.getItem('noteList')) {
+        store.commit('setNoteFromStorage', JSON.parse(window.localStorage.getItem('noteList')))
+      }
+    })
+
+    // when changing the list of notes in the vuex storage, overwrite the value in the local storage
+    watch(() => store.state.noteList, () => {
+      window.localStorage.setItem('noteList', JSON.stringify(store.state.noteList));
+    }, { deep: true })
   }
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style scoped>
+.main-layout {
+  max-width: 960px;
+  padding: 40px 60px;
+  margin: 0 auto;
 }
 </style>
+
+<style src="@/assets/main.css"></style>
